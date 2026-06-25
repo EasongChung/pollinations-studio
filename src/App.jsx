@@ -288,7 +288,7 @@ function ImageTab({ t, history, addToHistory }) {
       {showAdvanced && (
         <GlassCard className="p-4 sm:p-5 space-y-4 animate-[fadeIn_0.2s_ease-out]">
           <div className="grid grid-cols-2 gap-4">
-            <div><label className="text-xs text-white/40 mb-1.5 block">{t('seed')}</label><input type="text" value={seed} onChange={e => setSeed(e.target.value)} placeholder={t('random')} className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-3 py-2.5 text-white/80 text-sm placeholder-white/20 focus:outline-none focus:ring-2 focus:ring-violet-500/40" /></div>
+            <div><label className="text-xs text-white/40 mb-1.5 block">{t('seed')}</label><div className="flex gap-2"><input type="text" value={seed} onChange={e => setSeed(e.target.value)} placeholder={t('random')} className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-xl px-3 py-2.5 text-white/80 text-sm placeholder-white/20 focus:outline-none focus:ring-2 focus:ring-violet-500/40" /><button onClick={() => setSeed(String(Math.floor(Math.random() * 999999999)))} className="px-3 py-2 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white/50 hover:text-white/80 hover:bg-white/[0.10] text-xs transition-all">🎲</button></div></div>
             <div><label className="text-xs text-white/40 mb-1.5 block">{t('guidance')} · {guidanceScale}</label><input type="range" min="1" max="20" step="0.5" value={guidanceScale} onChange={e => setGuidanceScale(parseFloat(e.target.value))} className="w-full accent-violet-500" /></div>
           </div>
           <div className="flex flex-wrap gap-4">
@@ -437,7 +437,7 @@ function ChatTab({ t, chatHistory, addChatHistory, clearChatHistory }) {
                 const entry = chatHistory.find(h => String(h.id) === e.target.value)
                 if (entry) { setMessages(entry.messages); setModel(entry.model) }
               }
-            }} className="text-xs bg-white/[0.04] border border-white/[0.08] rounded-lg px-2 py-1 text-white/60 focus:outline-none">
+            }} className="text-xs bg-gray-800 border border-white/[0.08] rounded-lg px-2 py-1 text-white/70 focus:outline-none focus:ring-2 focus:ring-violet-500/40">
               <option value="">{t('chatHistory')}···</option>
               {chatHistory.map(h => (
                 <option key={h.id} value={h.id}>{new Date(h.timestamp).toLocaleTimeString()}</option>
