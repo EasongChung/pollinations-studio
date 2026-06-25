@@ -41,6 +41,7 @@ const I18N = {
     copied: 'URL 已复制到剪贴板', random: '随机',
     videoMode: '视频模式', img2video: '图生视频', txt2video: '文生视频',
     refPic: '参考图片（选填）', motionPHshort: '描述画面中的运动...',
+    history: 'History',
   },
   zh: {
     heroDesc: 'Pollinations Studio 中文版 — 专为中文用户打造的 AI 创意工作台。官方 Pollinations 暂不支持中文界面，本页面提供完整的中文体验，免费使用，无需注册。',
@@ -72,6 +73,7 @@ const I18N = {
     copied: 'URL 已复制到剪贴板', random: '随机',
     videoMode: '视频模式', img2video: '图生视频', txt2video: '文生视频',
     refPic: '参考图片（选填）', motionPHshort: '描述画面中的运动...',
+    history: '临时记录',
   },
 }
 
@@ -208,7 +210,7 @@ function TabNav({ tabs, activeTab, setActiveTab }) {
 }
 
 // ─── Image Tab ─────────────────────────────────────────────────
-function ImageTab({ t }) {
+function ImageTab({ t, history, addToHistory }) {
   const lang = useContext(LangContext)
   const [prompt, setPrompt] = useState('')
   const [negativePrompt, setNegativePrompt] = useState('')
@@ -238,7 +240,7 @@ function ImageTab({ t }) {
     const url = `https://image.pollinations.ai/p/${encodeURIComponent(prompt.trim())}?${p.toString()}`
     setGeneratedUrl(url)
     const img = new Image()
-    img.onload = () => { setImageUrl(url); setGenerating(false) }
+    img.onload = () => { setImageUrl(url); setGenerating(false); addToHistory({ url, prompt: prompt.trim(), model, aspectRatio }) }
     img.onerror = () => { setImageError(t('imgFailed')); setGenerating(false) }
     img.src = url
   }, [prompt, model, r, seed, negativePrompt, enhance, nologo, guidanceScale, t])
@@ -310,7 +312,7 @@ function ImageTab({ t }) {
       {imageUrl && !generating && (
         <GlassCard className="p-3 sm:p-4 overflow-hidden">
           <div className="relative group rounded-xl overflow-hidden">
-            <img src={imageUrl} alt={prompt} className="w-full rounded-xl" onError={() => setImageError(t('imgFailed'))} />
+            <img src={imageUrl} alt={prompt} className="w-full max-h-[65vh] object-contain rounded-xl" onError={() => setImageError(t('imgFailed'))} />
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300 rounded-xl flex items-center justify-center">
               <a href={imageUrl} target="_blank" rel="noopener noreferrer" className="opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center gap-2 bg-white/90 backdrop-blur-sm text-gray-900 px-4 py-2.5 rounded-xl font-medium text-sm"><Icons.ExternalLink className="w-4 h-4" />{t('viewFull')}</a>
             </div>
@@ -318,10 +320,6 @@ function ImageTab({ t }) {
           <div className="grid grid-cols-2 gap-3 mt-4">
             <button onClick={dl} className="flex items-center justify-center gap-2 py-3 bg-white/[0.05] hover:bg-white/[0.10] border border-white/[0.08] rounded-xl text-sm font-medium text-white/80 transition-all"><Icons.Download className="w-4 h-4" />{t('download')}</button>
             <button onClick={copyUrl} className="flex items-center justify-center gap-2 py-3 bg-white/[0.05] hover:bg-white/[0.10] border border-white/[0.08] rounded-xl text-sm font-medium text-white/80 transition-all"><Icons.Copy className="w-4 h-4" />{t('copyUrl')}</button>
-          </div>
-          <div className="bg-black/20 rounded-xl p-4 border border-white/[0.04] mt-4">
-            <p className="text-[10px] text-white/20 mb-1.5 font-mono uppercase tracking-wider">{t('directUrl')}</p>
-            <code className="text-[11px] text-violet-400/80 break-all font-mono leading-relaxed">{generatedUrl}</code>
           </div>
         </GlassCard>
       )}
@@ -338,6 +336,22 @@ function ImageTab({ t }) {
         </GlassCard>
       )}
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+      {history && history.length > 0 && (
+        <GlassCard className="p-3 sm:p-4">
+          <SectionLabel>{t('history')}</SectionLabel>
+          <div className="grid grid-cols-3 gap-2 mt-2 max-h-[320px] overflow-y-auto">
+            {history.map(item => (
+              <button key={item.id} onClick={() => { window.open(item.url, '_blank') }}
+                className="group relative aspect-square rounded-lg overflow-hidden border border-white/[0.06] hover:border-violet-400/40 transition-all">
+                <img src={item.url} alt={item.prompt} className="w-full h-full object-cover" loading="lazy" />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
+                  <span className="text-[10px] text-white/80 px-2 py-1 bg-black/60 rounded-md">{item.model}</span>
+                </div>
+              </button>
+            ))}
+          </div>
+        </GlassCard>
+      )}
     </div>
   )
 
@@ -583,6 +597,11 @@ function VideoTab({ t }) {
 export default function App() {
   const [lang, setLang] = useState(() => navigator.language?.startsWith('zh') ? 'zh' : 'zh')
   const [activeTab, setActiveTab] = useState('image')
+  const [imageHistory, setImageHistory] = useState([])
+
+  const addToHistory = useCallback((record) => {
+    setImageHistory(prev => [{ id: Date.now(), ...record }, ...prev].slice(0, 20))
+  }, [])
 
   const tabs = [
     { key: 'image', label: I18N[lang].tabImage, icon: Icons.Image },
@@ -610,7 +629,7 @@ export default function App() {
           </div>
           <TabNav tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
           <div className="max-w-5xl mx-auto">
-            {activeTab === 'image' && <ImageTab t={k => I18N[lang][k]} />}
+            {activeTab === 'image' && <ImageTab t={k => I18N[lang][k]} history={imageHistory} addToHistory={addToHistory} />}
             {activeTab === 'text' && <ChatTab t={k => I18N[lang][k]} />}
             {activeTab === 'video' && <VideoTab t={k => I18N[lang][k]} />}
           </div>
