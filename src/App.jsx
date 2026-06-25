@@ -411,7 +411,7 @@ function ChatTab({ t, chatHistory, addChatHistory, clearChatHistory }) {
         <div className="flex items-center justify-between mb-3">
           <p className="text-xs text-white/30 font-semibold uppercase tracking-wider">{t('model')}</p>
           <button onClick={handleNewTopic}
-            className="text-[10px] text-violet-400/50 hover:text-violet-300 transition-colors">{t('newChat')}</button>
+            className="text-xs text-violet-400/50 hover:text-violet-300 transition-colors">{t('newChat')}</button>
         </div>
       <div className="flex flex-col gap-1.5">
         {TEXT_MODELS.map(m => (
@@ -429,7 +429,7 @@ function ChatTab({ t, chatHistory, addChatHistory, clearChatHistory }) {
   const right = (
     <GlassCard className="overflow-hidden flex flex-col h-[500px]">
       <div className="shrink-0 flex items-center justify-between px-4 pt-3 pb-1 border-b border-white/[0.06]">
-        <p className="text-[10px] text-white/30 font-semibold uppercase tracking-wider">{t('chatHistory')}</p>
+        <p className="text-xs text-white/30 font-semibold uppercase tracking-wider">{t('chatHistory')}</p>
         <div className="flex gap-2">
           {chatHistory && chatHistory.length > 0 && (
             <select onChange={e => {
@@ -437,7 +437,7 @@ function ChatTab({ t, chatHistory, addChatHistory, clearChatHistory }) {
                 const entry = chatHistory.find(h => String(h.id) === e.target.value)
                 if (entry) { setMessages(entry.messages); setModel(entry.model) }
               }
-            }} className="text-[10px] bg-white/[0.04] border border-white/[0.08] rounded-lg px-2 py-1 text-white/60 focus:outline-none">
+            }} className="text-xs bg-white/[0.04] border border-white/[0.08] rounded-lg px-2 py-1 text-white/60 focus:outline-none">
               <option value="">{t('chatHistory')}···</option>
               {chatHistory.map(h => (
                 <option key={h.id} value={h.id}>{new Date(h.timestamp).toLocaleTimeString()}</option>
@@ -445,7 +445,7 @@ function ChatTab({ t, chatHistory, addChatHistory, clearChatHistory }) {
             </select>
           )}
           <button onClick={handleNewTopic}
-            className="text-[10px] text-violet-400/50 hover:text-violet-300 transition-colors">{t('newChat')}</button>
+            className="text-xs text-violet-400/50 hover:text-violet-300 transition-colors">{t('newChat')}</button>
         </div>
       </div>
       <div className="flex-1 overflow-y-auto">
@@ -614,7 +614,6 @@ function VideoTab({ t, history, addToHistory }) {
         </>
       )}
 
-      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
       {history && history.length > 0 && (
         <GlassCard className="p-3 sm:p-4">
           <SectionLabel>{t('history')}</SectionLabel>
