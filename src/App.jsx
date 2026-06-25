@@ -381,13 +381,13 @@ function ChatTab({ t }) {
   // Left: model selector (narrow single column)
   const left = (
     <GlassCard className="p-3">
-      <p className="text-[10px] text-white/30 mb-3 font-semibold uppercase tracking-wider">{t('model')}</p>
+      <p className="text-xs text-white/30 mb-3 font-semibold uppercase tracking-wider">{t('model')}</p>
       <div className="flex flex-col gap-1.5">
         {TEXT_MODELS.map(m => (
           <button key={m.value} onClick={() => setModel(m.value)}
             className={`p-2.5 rounded-xl border text-left transition-all duration-200 ${model === m.value ? 'bg-violet-500/20 border-violet-400/30' : 'bg-white/[0.03] border-white/[0.06] hover:bg-white/[0.06]'}`}>
             <div className="text-sm font-semibold text-white">{m.label}</div>
-            <div className="text-[9px] text-white/30 mt-0.5">{lang === 'zh' ? m.descZh : m.descEn}</div>
+            <div className="text-xs text-white/30 mt-0.5">{lang === 'zh' ? m.descZh : m.descEn}</div>
           </button>
         ))}
       </div>
@@ -401,8 +401,8 @@ function ChatTab({ t }) {
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-white/20 gap-3 p-8">
             <div className="w-16 h-16 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center"><Icons.Bot className="w-8 h-8" /></div>
-            <p className="text-sm font-medium">{t('chatStart')}</p>
-            <p className="text-xs text-white/10">{t('chatStartDesc')}</p>
+            <p className="text-base font-medium">{t('chatStart')}</p>
+            <p className="text-sm text-white/10">{t('chatStartDesc')}</p>
           </div>
         ) : (
           <div className="p-4 space-y-4">
@@ -411,8 +411,8 @@ function ChatTab({ t }) {
                 <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${msg.role === 'user' ? 'bg-violet-500/20' : 'bg-white/[0.06]'}`}>
                   {msg.role === 'user' ? <Icons.User className="w-4 h-4 text-violet-300" /> : <Icons.Bot className="w-4 h-4 text-white/40" />}
                 </div>
-                <div className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${msg.role === 'user' ? 'bg-violet-500/15 border border-violet-400/20 text-white/90 rounded-tr-md' : 'bg-white/[0.04] border border-white/[0.06] text-white/80 rounded-tl-md'}`}>
-                  <pre className="whitespace-pre-wrap font-sans text-sm">{msg.content}</pre>
+                <div className={`max-w-[85%] rounded-2xl px-4 py-3 text-base leading-relaxed ${msg.role === 'user' ? 'bg-violet-500/15 border border-violet-400/20 text-white/90 rounded-tr-md' : 'bg-white/[0.04] border border-white/[0.06] text-white/80 rounded-tl-md'}`}>
+                  <pre className="whitespace-pre-wrap font-sans text-base">{msg.content}</pre>
                 </div>
               </div>
             ))}
@@ -431,7 +431,7 @@ function ChatTab({ t }) {
         <div className="flex gap-2">
           <input type="text" value={prompt} onChange={e => setPrompt(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() }}} placeholder={t('chatPH')}
-            className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-3 text-white/90 placeholder-white/25 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/40 focus:border-violet-500/30 transition-all" />
+            className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-3 text-white/90 placeholder-white/25 text-base focus:outline-none focus:ring-2 focus:ring-violet-500/40 focus:border-violet-500/30 transition-all" />
           <button onClick={send} disabled={loading || !prompt.trim()}
             className="w-11 h-11 rounded-xl bg-violet-500 hover:bg-violet-600 disabled:bg-white/[0.06] disabled:cursor-not-allowed flex items-center justify-center transition-all"><Icons.Send className="w-4 h-4 text-white" /></button>
         </div>
@@ -599,12 +599,12 @@ export default function App() {
           <div className="absolute top-1/3 right-1/3 w-[500px] h-[500px] bg-amber-500/[0.03] rounded-full blur-[120px]" />
         </div>
         <Header lang={lang} setLang={setLang} />
-        <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-12">
-          <div className="text-center mb-8 sm:mb-12">
+        <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
+          <div className="text-center mb-4 sm:mb-6">
             <h2 className="text-2xl sm:text-4xl font-bold text-white tracking-tight">Pollinations Studio</h2>
-            <p className="text-sm sm:text-base text-white/30 mt-2 max-w-2xl mx-auto">{I18N[lang].heroDesc}</p>
+            <p className="text-sm sm:text-base text-white/30 mt-1 max-w-2xl mx-auto">{I18N[lang].heroDesc}</p>
             <a href="https://pollinations.ai" target="_blank" rel="noopener noreferrer"
-               className="inline-block mt-3 text-xs sm:text-sm text-violet-400/60 hover:text-violet-300 transition-colors">
+               className="inline-block mt-2 text-xs sm:text-sm text-violet-400/60 hover:text-violet-300 transition-colors">
               {lang === 'zh' ? '前往 Pollinations 官方网站 →' : 'Visit Pollinations Official Site →'}
             </a>
           </div>
@@ -614,7 +614,7 @@ export default function App() {
             {activeTab === 'text' && <ChatTab t={k => I18N[lang][k]} />}
             {activeTab === 'video' && <VideoTab t={k => I18N[lang][k]} />}
           </div>
-          <footer className="mt-16 sm:mt-20 pt-8 sm:pt-10 border-t border-white/[0.04] text-center">
+          <footer className="mt-12 sm:mt-16 pt-6 sm:pt-8 border-t border-white/[0.04] text-center">
             <p className="text-xs text-white/20">{I18N[lang].footer}</p>
           </footer>
         </main>
