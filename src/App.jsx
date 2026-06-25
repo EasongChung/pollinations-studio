@@ -42,6 +42,8 @@ const I18N = {
     videoMode: '视频模式', img2video: '图生视频', txt2video: '文生视频',
     refPic: '参考图片（选填）', motionPHshort: '描述画面中的运动...',
     history: 'History',
+    newChat: 'New Topic',
+    chatHistory: 'Chat History',
   },
   zh: {
     heroDesc: 'Pollinations Studio 中文版 — 专为中文用户打造的 AI 创意工作台。官方 Pollinations 暂不支持中文界面，本页面提供完整的中文体验，免费使用，无需注册。',
@@ -74,6 +76,8 @@ const I18N = {
     videoMode: '视频模式', img2video: '图生视频', txt2video: '文生视频',
     refPic: '参考图片（选填）', motionPHshort: '描述画面中的运动...',
     history: '临时记录',
+    newChat: '新话题',
+    chatHistory: '对话记录',
   },
 }
 
@@ -266,6 +270,17 @@ function ImageTab({ t, history, addToHistory }) {
           {IMAGE_MODELS.map(m => <Chip key={m.value} label={m.label} active={model === m.value} free={m.free} onClick={() => setModel(m.value)} />)}
         </div>
       </GlassCard>
+      <GlassCard className="p-4 sm:p-5">
+        <SectionLabel>{t('aspectRatio')}</SectionLabel>
+        <div className="flex gap-2 flex-wrap">
+          {ASPECT_RATIOS.map(r2 => (
+            <button key={r2.label} onClick={() => setAspectRatio(r2.label)}
+              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl border text-xs sm:text-sm font-medium transition-all duration-200 ${aspectRatio === r2.label ? 'bg-violet-500/20 border-violet-400/30 text-violet-200' : 'bg-white/[0.03] border-white/[0.06] text-white/40 hover:text-white/70 hover:bg-white/[0.06]'}`}>
+              {r2.label}<span className="ml-1 text-[10px] text-white/30">{r2.w}×{r2.h}</span>
+            </button>
+          ))}
+        </div>
+      </GlassCard>
       <button onClick={() => setShowAdvanced(!showAdvanced)} className="flex items-center gap-2 text-xs text-white/40 hover:text-white/70 transition-colors">
         <Icons.Settings className="w-3.5 h-3.5" />{t('advanced')}
         <svg className={`w-3 h-3 transition-transform ${showAdvanced ? 'rotate-90' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
@@ -285,21 +300,10 @@ function ImageTab({ t, history, addToHistory }) {
     </div>
   )
 
-  // Right: generate btn + aspect ratio + preview
+  // Right: generate btn + preview
   const right = (
     <div className="space-y-4">
       <PrimaryBtn onClick={gen} disabled={generating || !prompt.trim()} loading={generating} icon={Icons.Sparkles}>{t('generate')}</PrimaryBtn>
-      <GlassCard className="p-4 sm:p-5">
-        <SectionLabel>{t('aspectRatio')}</SectionLabel>
-        <div className="flex gap-2 flex-wrap">
-          {ASPECT_RATIOS.map(r2 => (
-            <button key={r2.label} onClick={() => setAspectRatio(r2.label)}
-              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl border text-xs sm:text-sm font-medium transition-all duration-200 ${aspectRatio === r2.label ? 'bg-violet-500/20 border-violet-400/30 text-violet-200' : 'bg-white/[0.03] border-white/[0.06] text-white/40 hover:text-white/70 hover:bg-white/[0.06]'}`}>
-              {r2.label}<span className="ml-1 text-[10px] text-white/30">{r2.w}×{r2.h}</span>
-            </button>
-          ))}
-        </div>
-      </GlassCard>
       {generating && (
         <GlassCard className="p-4 overflow-hidden">
           <div className="flex flex-col items-center gap-3 py-12">
@@ -325,7 +329,7 @@ function ImageTab({ t, history, addToHistory }) {
       )}
       {!generating && !imageUrl && (
         <GlassCard className="p-4 overflow-hidden">
-          <div className="flex flex-col items-center justify-center py-16 text-white/20 gap-3">
+          <div className="flex flex-col items-center justify-center aspect-square text-white/20 gap-3">
             <Icons.Image className="w-14 h-14 opacity-30" /><p className="text-sm text-white/15">{t('genImageHint')}</p>
           </div>
         </GlassCard>
@@ -370,7 +374,7 @@ function ImageTab({ t, history, addToHistory }) {
 }
 
 // ─── Chat Tab ──────────────────────────────────────────────────
-function ChatTab({ t }) {
+function ChatTab({ t, chatHistory, addChatHistory, clearChatHistory }) {
   const lang = useContext(LangContext)
   const [prompt, setPrompt] = useState('')
   const [model, setModel] = useState('openai')
@@ -384,18 +388,31 @@ function ChatTab({ t }) {
 
   const send = useCallback(() => {
     if (!prompt.trim() || loading) return
-    setMessages(p => [...p, { role: 'user', content: prompt.trim() }])
+    const userMsg = prompt.trim()
+    setMessages(p => [...p, { role: 'user', content: userMsg }])
     setPrompt(''); setLoading(true)
-    fetch(`https://text.pollinations.ai/${encodeURIComponent(prompt.trim())}?model=${model}&max_tokens=${maxTokens}&temperature=${temperature}`, { signal: AbortSignal.timeout(120000) })
+    fetch(`https://text.pollinations.ai/${encodeURIComponent(userMsg)}?model=${model}&max_tokens=${maxTokens}&temperature=${temperature}`, { signal: AbortSignal.timeout(120000) })
       .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.text() })
-      .then(t => { setMessages(p => [...p, { role: 'assistant', content: t }]); setLoading(false) })
+      .then(text => { setMessages(p => [...p, { role: 'assistant', content: text }]); setLoading(false) })
       .catch(e => { setMessages(p => [...p, { role: 'assistant', content: e.name === 'AbortError' ? t('reqTimeout') : `${t('genFailed')}: ${e.message}` }]); setLoading(false) })
   }, [prompt, model, maxTokens, temperature, loading, t])
+
+  const handleNewTopic = useCallback(() => {
+    if (messages.length > 0) {
+      addChatHistory({ id: Date.now(), model, messages, timestamp: Date.now() })
+    }
+    setMessages([])
+    setPrompt('')
+  }, [messages, model, addChatHistory])
 
   // Left: model selector (narrow single column)
   const left = (
     <GlassCard className="p-3">
-      <p className="text-xs text-white/30 mb-3 font-semibold uppercase tracking-wider">{t('model')}</p>
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-xs text-white/30 font-semibold uppercase tracking-wider">{t('model')}</p>
+          <button onClick={handleNewTopic}
+            className="text-[10px] text-violet-400/50 hover:text-violet-300 transition-colors">{t('newChat')}</button>
+        </div>
       <div className="flex flex-col gap-1.5">
         {TEXT_MODELS.map(m => (
           <button key={m.value} onClick={() => setModel(m.value)}
@@ -411,6 +428,26 @@ function ChatTab({ t }) {
   // Right: fixed chat window with scrollbar
   const right = (
     <GlassCard className="overflow-hidden flex flex-col h-[500px]">
+      <div className="shrink-0 flex items-center justify-between px-4 pt-3 pb-1 border-b border-white/[0.06]">
+        <p className="text-[10px] text-white/30 font-semibold uppercase tracking-wider">{t('chatHistory')}</p>
+        <div className="flex gap-2">
+          {chatHistory && chatHistory.length > 0 && (
+            <select onChange={e => {
+              if (e.target.value) {
+                const entry = chatHistory.find(h => String(h.id) === e.target.value)
+                if (entry) { setMessages(entry.messages); setModel(entry.model) }
+              }
+            }} className="text-[10px] bg-white/[0.04] border border-white/[0.08] rounded-lg px-2 py-1 text-white/60 focus:outline-none">
+              <option value="">{t('chatHistory')}···</option>
+              {chatHistory.map(h => (
+                <option key={h.id} value={h.id}>{new Date(h.timestamp).toLocaleTimeString()}</option>
+              ))}
+            </select>
+          )}
+          <button onClick={handleNewTopic}
+            className="text-[10px] text-violet-400/50 hover:text-violet-300 transition-colors">{t('newChat')}</button>
+        </div>
+      </div>
       <div className="flex-1 overflow-y-auto">
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-white/20 gap-3 p-8">
@@ -469,7 +506,7 @@ function ChatTab({ t }) {
 }
 
 // ─── Video Tab ─────────────────────────────────────────────────
-function VideoTab({ t }) {
+function VideoTab({ t, history, addToHistory }) {
   const [videoMode, setVideoMode] = useState('img2video') // img2video | txt2video
   const [prompt, setPrompt] = useState('')
   const [imageUrl, setImageUrl] = useState('')
@@ -496,7 +533,7 @@ function VideoTab({ t }) {
     setProgress(20)
     fetch(url, { signal: AbortSignal.timeout(300000) })
       .then(r => { setProgress(60); if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.blob() })
-      .then(b => { setProgress(80); setVideoUrl(URL.createObjectURL(b)); setProgress(100); setLoading(false) })
+      .then(b => { setProgress(80); const url = URL.createObjectURL(b); setVideoUrl(url); setProgress(100); setLoading(false); addToHistory({ videoUrl: url, prompt: prompt.trim(), model, videoMode }) })
       .catch(e => { setProgress(0); setLoading(false); setError(e.name === 'AbortError' ? t('videoFailed') : `${t('genFailed')}: ${e.message}`) })
   }, [prompt, imageUrl, model, duration, width, height, videoMode, t])
 
@@ -577,9 +614,21 @@ function VideoTab({ t }) {
         </>
       )}
 
-      {error && (
-        <GlassCard className="p-4 border-red-500/20 bg-red-500/[0.04]">
-          <div className="flex items-start gap-3"><Icons.AlertCircle className="w-4 h-4 text-red-400 mt-0.5 shrink-0" /><p className="text-sm text-red-400/80">{error}</p></div>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+      {history && history.length > 0 && (
+        <GlassCard className="p-3 sm:p-4">
+          <SectionLabel>{t('history')}</SectionLabel>
+          <div className="grid grid-cols-2 gap-2 mt-2 max-h-[240px] overflow-y-auto">
+            {history.map(item => (
+              <button key={item.id} onClick={() => { window.open(item.videoUrl, '_blank') }}
+                className="group relative aspect-video rounded-lg overflow-hidden border border-white/[0.06] hover:border-violet-400/40 transition-all">
+                <video src={item.videoUrl} className="w-full h-full object-cover" muted />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
+                  <span className="text-[10px] text-white/80 px-2 py-1 bg-black/60 rounded-md">{item.model}</span>
+                </div>
+              </button>
+            ))}
+          </div>
         </GlassCard>
       )}
     </div>
@@ -598,9 +647,20 @@ export default function App() {
   const [lang, setLang] = useState(() => navigator.language?.startsWith('zh') ? 'zh' : 'zh')
   const [activeTab, setActiveTab] = useState('image')
   const [imageHistory, setImageHistory] = useState([])
+  const [chatHistory, setChatHistory] = useState([])
+  const [videoHistory, setVideoHistory] = useState([])
 
   const addToHistory = useCallback((record) => {
     setImageHistory(prev => [{ id: Date.now(), ...record }, ...prev].slice(0, 20))
+  }, [])
+  const addChatHistory = useCallback((record) => {
+    setChatHistory(prev => [record, ...prev].slice(0, 10))
+  }, [])
+  const clearChatHistory = useCallback(() => {
+    setChatHistory([])
+  }, [])
+  const addVideoHistory = useCallback((record) => {
+    setVideoHistory(prev => [{ id: Date.now(), ...record }, ...prev].slice(0, 10))
   }, [])
 
   const tabs = [
@@ -630,8 +690,8 @@ export default function App() {
           <TabNav tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
           <div className="max-w-5xl mx-auto">
             {activeTab === 'image' && <ImageTab t={k => I18N[lang][k]} history={imageHistory} addToHistory={addToHistory} />}
-            {activeTab === 'text' && <ChatTab t={k => I18N[lang][k]} />}
-            {activeTab === 'video' && <VideoTab t={k => I18N[lang][k]} />}
+            {activeTab === 'text' && <ChatTab t={k => I18N[lang][k]} chatHistory={chatHistory} addChatHistory={addChatHistory} clearChatHistory={clearChatHistory} />}
+            {activeTab === 'video' && <VideoTab t={k => I18N[lang][k]} history={videoHistory} addToHistory={addVideoHistory} />}
           </div>
           <footer className="mt-12 sm:mt-16 pt-6 sm:pt-8 border-t border-white/[0.04] text-center">
             <p className="text-xs text-white/20">{I18N[lang].footer}</p>
