@@ -107,10 +107,10 @@ const Icons = {
 
 // ─── Data ──────────────────────────────────────────────────────
 const IMAGE_MODELS = [
-  { value: 'flux', label: 'Flux', free: true }, { value: 'flux-realism', label: 'Realism', free: true },
-  { value: 'flux-3d', label: '3D Render', free: true }, { value: 'flux-anime', label: 'Anime', free: true },
-  { value: 'flux-pixel', label: 'Pixel Art', free: true }, { value: 'flux-cablyai', label: 'CablyAI', free: true },
-  { value: 'turbo', label: 'Turbo', free: false }, { value: 'flux-caricature', label: 'Caricature', free: true },
+  { value: 'flux', label: 'Flux', free: true }, { value: 'flux-realism', label: 'Realism', free: false },
+  { value: 'flux-3d', label: '3D Render', free: false }, { value: 'flux-anime', label: 'Anime', free: false },
+  { value: 'flux-pixel', label: 'Pixel Art', free: false }, { value: 'flux-cablyai', label: 'CablyAI', free: false },
+  { value: 'turbo', label: 'Turbo', free: false }, { value: 'flux-caricature', label: 'Caricature', free: false },
 ]
 const ASPECT_RATIOS = [
   { label: '1:1', w: 1024, h: 1024 }, { label: '16:9', w: 1344, h: 768 }, { label: '9:16', w: 768, h: 1344 },
@@ -123,7 +123,7 @@ const TEXT_MODELS = [
   { value: 'meta', label: 'Llama', descZh: 'Meta · 开源', descEn: 'Meta · Open source' },
 ]
 const VIDEO_MODELS = [
-  { value: 'ltxv', label: 'LTX-Video', free: true },
+  { value: 'ltxv', label: 'LTX-Video', free: false },
   { value: 'flux', label: 'Flux Video', free: false },
   { value: 'wan', label: 'Wan 2.1', free: false },
 ]
@@ -287,10 +287,8 @@ function ImageTab({ t, history, addToHistory }) {
       </button>
       {showAdvanced && (
         <GlassCard className="p-4 sm:p-5 space-y-4 animate-[fadeIn_0.2s_ease-out]">
-          <div className="grid grid-cols-2 gap-4">
-            <div><label className="text-xs text-white/40 mb-1.5 block">{t('seed')}</label><div className="flex gap-2"><input type="text" value={seed} onChange={e => setSeed(e.target.value)} placeholder={t('random')} className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-xl px-3 py-2.5 text-white/80 text-sm placeholder-white/20 focus:outline-none focus:ring-2 focus:ring-violet-500/40" /><button onClick={() => setSeed(String(Math.floor(Math.random() * 999999999)))} className="px-3 py-2 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white/50 hover:text-white/80 hover:bg-white/[0.10] text-xs transition-all">🎲</button></div></div>
-            <div><label className="text-xs text-white/40 mb-1.5 block">{t('guidance')} · {guidanceScale}</label><input type="range" min="1" max="20" step="0.5" value={guidanceScale} onChange={e => setGuidanceScale(parseFloat(e.target.value))} className="w-full accent-violet-500" /></div>
-          </div>
+          <div><label className="text-xs text-white/40 mb-1.5 block">{t('seed')}</label><div className="flex gap-2"><input type="text" value={seed} onChange={e => setSeed(e.target.value)} placeholder={t('random')} className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-xl px-3 py-2.5 text-white/80 text-sm placeholder-white/20 focus:outline-none focus:ring-2 focus:ring-violet-500/40" /><button onClick={() => setSeed(String(Math.floor(Math.random() * 999999999)))} className="px-3 py-2 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white/50 hover:text-white/80 hover:bg-white/[0.10] text-xs transition-all shrink-0">🎲</button></div></div>
+          <div><label className="text-xs text-white/40 mb-1.5 block">{t('guidance')} · {guidanceScale}</label><input type="range" min="1" max="20" step="0.5" value={guidanceScale} onChange={e => setGuidanceScale(parseFloat(e.target.value))} className="w-full accent-violet-500" /></div>
           <div className="flex flex-wrap gap-4">
             <label className="flex items-center gap-2 cursor-pointer"><input type="checkbox" checked={enhance} onChange={e => setEnhance(e.target.checked)} className="w-4 h-4 accent-violet-500 rounded" /><span className="text-xs text-white/60">{t('enhance')}</span></label>
             <label className="flex items-center gap-2 cursor-pointer"><input type="checkbox" checked={nologo} onChange={e => setNologo(e.target.checked)} className="w-4 h-4 accent-violet-500 rounded" /><span className="text-xs text-white/60">{t('nologo')}</span></label>
@@ -437,7 +435,7 @@ function ChatTab({ t, chatHistory, addChatHistory, clearChatHistory }) {
                 const entry = chatHistory.find(h => String(h.id) === e.target.value)
                 if (entry) { setMessages(entry.messages); setModel(entry.model) }
               }
-            }} className="text-xs bg-gray-800 border border-white/[0.08] rounded-lg px-2 py-1 text-white/70 focus:outline-none focus:ring-2 focus:ring-violet-500/40">
+            }} className="text-xs bg-[#0a0a0f] border border-white/[0.08] rounded-lg px-2 py-1 text-white/70 focus:outline-none focus:ring-2 focus:ring-violet-500/40">
               <option value="">{t('chatHistory')}···</option>
               {chatHistory.map(h => (
                 <option key={h.id} value={h.id}>{new Date(h.timestamp).toLocaleTimeString()}</option>
