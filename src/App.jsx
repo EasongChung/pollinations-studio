@@ -19,7 +19,7 @@ const I18N = {
     appSubtitle: 'AI Creative Workspace',
     heroTitle: 'Create with',
     heroAI: 'AI',
-    heroDesc: 'Generate images, chat with AI, and create videos — all powered by Pollinations, completely free.',
+    heroDesc: 'Pollinations Studio 中文版 — 专为中文用户打造的 AI 创意工作台。官方 Pollinations 暂不支持中文界面，本页面提供完整的中文体验，免费使用，无需注册。',
     tabImage: 'Image Generation',
     tabChat: 'AI Chat',
     tabVideo: 'Video Generation',
@@ -84,7 +84,7 @@ const I18N = {
     appSubtitle: 'AI 创意工作室',
     heroTitle: '用',
     heroAI: 'AI',
-    heroDesc: '生成图像、AI 对话、创建视频 — 全部基于 Pollinations，完全免费。',
+    heroDesc: 'Pollinations Studio 中文版 — 专为中文用户打造的 AI 创意工作台。官方 Pollinations 暂不支持中文界面，本页面提供完整的中文体验，免费使用，无需注册。',
     tabImage: '文生图',
     tabChat: 'AI 对话',
     tabVideo: '图生视频',
@@ -627,7 +627,7 @@ function ImageTab({ t }) {
         {resultPanel}
       </div>
       {/* Desktop: two column */}
-      <div className="hidden lg:grid lg:grid-cols-2 lg:gap-6">
+      <div className="hidden lg:grid lg:grid-cols-2 lg:gap-10">
         <div>
           <PrimaryButton onClick={handleGenerate} disabled={generating || !prompt.trim()} loading={generating} icon={Icons.Sparkles}>{t('generate')}</PrimaryButton>
           {inputPanel}
@@ -752,7 +752,7 @@ function TextTab({ t }) {
         </GlassCard>
       </div>
       {/* Desktop: two column */}
-      <div className="hidden lg:grid lg:grid-cols-2 lg:gap-6">
+      <div className="hidden lg:grid lg:grid-cols-2 lg:gap-10">
         <GlassCard className="p-4">
           <div className="grid grid-cols-2 gap-2">
             {TEXT_MODELS.map(m => (
@@ -880,7 +880,7 @@ function VideoTab({ t }) {
         {inputPanel}
         {resultPanel}
       </div>
-      <div className="hidden lg:grid lg:grid-cols-2 lg:gap-6">
+      <div className="hidden lg:grid lg:grid-cols-2 lg:gap-10">
         <div>
           <PrimaryButton onClick={handleGenerate} disabled={loading || !prompt.trim() || !imageUrl.trim()} loading={loading} icon={Icons.Video}>{t('genVideo')}</PrimaryButton>
           {inputPanel}
@@ -910,21 +910,28 @@ export default function App() {
       <div className="min-h-screen bg-[#0a0a0f] text-white">
         {/* Background Effects */}
         <div className="fixed inset-0 pointer-events-none">
-          <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-violet-500/[0.03] rounded-full blur-[120px]" />
-          <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-fuchsia-500/[0.03] rounded-full blur-[120px]" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-gradient-to-b from-violet-500/[0.02] to-transparent rounded-full blur-[100px]" />
+          <div className="absolute top-0 left-1/4 w-[900px] h-[900px] bg-violet-500/[0.05] rounded-full blur-[160px]" />
+          <div className="absolute bottom-0 right-1/4 w-[800px] h-[800px] bg-fuchsia-500/[0.05] rounded-full blur-[160px]" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1100px] h-[500px] bg-gradient-to-b from-violet-500/[0.03] to-transparent rounded-full blur-[140px]" />
+          <div className="absolute top-1/3 right-1/3 w-[400px] h-[400px] bg-amber-500/[0.03] rounded-full blur-[120px]" />
+          <div className="absolute bottom-1/4 left-1/3 w-[350px] h-[350px] bg-sky-500/[0.03] rounded-full blur-[100px]" />
         </div>
 
         <Header lang={lang} setLang={setLang} />
 
-        <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
+        <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-12">
           {/* Hero */}
-          <div className="text-center mb-4 sm:mb-8">
-            <h2 className="text-xl sm:text-3xl font-bold text-white tracking-tight">
-              {I18N[lang].heroTitle}{' '}
-              <span className="bg-gradient-to-r from-violet-400 to-fuchsia-400 bg-clip-text text-transparent">{I18N[lang].heroAI}</span>
-            </h2>
-            <p className="text-xs sm:text-sm text-white/30 mt-1 sm:mt-2 max-w-md mx-auto">
+          <div className="text-center mb-8 sm:mb-12">
+            <div className="flex items-center justify-center gap-3 mb-3">
+              <h2 className="text-2xl sm:text-4xl font-bold text-white tracking-tight">
+                {I18N[lang].heroTitle}{' '}
+                <span className="bg-gradient-to-r from-violet-400 to-fuchsia-400 bg-clip-text text-transparent">{I18N[lang].heroAI}</span>
+              </h2>
+              <span className="inline-flex items-center px-2.5 py-1 text-[10px] sm:text-xs font-semibold tracking-wide rounded-full bg-gradient-to-r from-violet-500/20 to-fuchsia-500/20 border border-violet-400/30 text-violet-300 whitespace-nowrap">
+                中文版
+              </span>
+            </div>
+            <p className="text-sm sm:text-base text-white/40 mt-2 sm:mt-3 max-w-2xl mx-auto leading-relaxed">
               {I18N[lang].heroDesc}
             </p>
           </div>
@@ -937,7 +944,7 @@ export default function App() {
             {activeTab === 'video' && <VideoTab t={key => I18N[lang][key]} />}
           </div>
 
-          <footer className="mt-12 sm:mt-16 pt-6 sm:pt-8 border-t border-white/[0.04] text-center">
+          <footer className="mt-16 sm:mt-20 pt-8 sm:pt-10 border-t border-white/[0.04] text-center">
             <p className="text-[10px] sm:text-xs text-white/20">
               {I18N[lang].footer}
             </p>
