@@ -1,31 +1,128 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react'
 
-// ============================================================
-// Pollinations Studio — AI Creative Studio
-// Free AI Image, Text & Video Generation Powered by Pollinations
-// ============================================================
+// ================================================================
+//  Pollinations Studio — AI Creative Studio
+//  Design: Dark Glassmorphism · Premium · Professional
+//  Stack: React 19 + Tailwind CSS 4 + Vite
+// ================================================================
 
-// ─── Utilities ────────────────────────────────────────────────
-
-function generateId() {
-  return Math.random().toString(36).slice(2, 10)
-}
+// ─── Utilities ─────────────────────────────────────────────────
 
 function encodePrompt(text) {
   return encodeURIComponent(text.trim())
 }
 
-// ─── Image Models ─────────────────────────────────────────────
+// ─── SVG Icons (no emoji) ──────────────────────────────────────
+
+const Icons = {
+  Sparkles: ({ className }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 3l1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5L12 3z"/>
+      <path d="M5 3l.5 2L7 5.5 5 6l-.5 2L4 6l-2-.5L4 5l.5-2L5 3z"/>
+      <path d="M19 15l.5 2 2 .5-2 .5-.5 2-.5-2-2-.5 2-.5.5-2z"/>
+    </svg>
+  ),
+  Image: ({ className }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+      <circle cx="8.5" cy="8.5" r="1.5"/>
+      <polyline points="21 15 16 10 5 21"/>
+    </svg>
+  ),
+  MessageCircle: ({ className }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    </svg>
+  ),
+  Video: ({ className }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="23 7 16 12 23 17 23 7"/>
+      <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+    </svg>
+  ),
+  Download: ({ className }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+      <polyline points="7 10 12 15 17 10"/>
+      <line x1="12" y1="15" x2="12" y2="3"/>
+    </svg>
+  ),
+  Copy: ({ className }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+    </svg>
+  ),
+  ExternalLink: ({ className }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+      <polyline points="15 3 21 3 21 9"/>
+      <line x1="10" y1="14" x2="21" y2="3"/>
+    </svg>
+  ),
+  Settings: ({ className }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+    </svg>
+  ),
+  Check: ({ className }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+  ),
+  AlertCircle: ({ className }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="12" y1="8" x2="12" y2="12"/>
+      <line x1="12" y1="16" x2="12.01" y2="16"/>
+    </svg>
+  ),
+  ChevronRight: ({ className }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="9 18 15 12 9 6"/>
+    </svg>
+  ),
+  Send: ({ className }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="22" y1="2" x2="11" y2="13"/>
+      <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+    </svg>
+  ),
+  User: ({ className }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+      <circle cx="12" cy="7" r="4"/>
+    </svg>
+  ),
+  Bot: ({ className }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="11" width="18" height="10" rx="2"/>
+      <circle cx="12" cy="5" r="2"/>
+      <path d="M12 7v4"/>
+      <line x1="8" y1="16" x2="8" y2="16"/>
+      <line x1="16" y1="16" x2="16" y2="16"/>
+    </svg>
+  ),
+  Loader: ({ className }) => (
+    <svg className={`animate-spin ${className}`} viewBox="0 0 24 24" fill="none">
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3"/>
+      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8V0C5.373 0 0 5.373 0 12h4z"/>
+    </svg>
+  ),
+}
+
+// ─── Data ──────────────────────────────────────────────────────
 
 const IMAGE_MODELS = [
-  { value: 'flux', label: 'Flux (Default)', desc: 'Fast & free', free: true },
-  { value: 'flux-realism', label: 'Flux Realism', desc: 'Photorealistic', free: true },
-  { value: 'flux-3d', label: 'Flux 3D', desc: '3D style', free: true },
-  { value: 'flux-caricature', label: 'Flux Caricature', desc: 'Cartoon style', free: true },
-  { value: 'flux-anime', label: 'Flux Anime', desc: 'Anime style', free: true },
-  { value: 'flux-pixel', label: 'Flux Pixel', desc: 'Pixel art', free: true },
+  { value: 'flux', label: 'Flux', desc: 'Default · Fast & free', free: true },
+  { value: 'flux-realism', label: 'Realism', desc: 'Photorealistic', free: true },
+  { value: 'flux-3d', label: '3D Render', desc: '3D style', free: true },
+  { value: 'flux-anime', label: 'Anime', desc: 'Anime style', free: true },
+  { value: 'flux-pixel', label: 'Pixel Art', desc: 'Retro pixel', free: true },
   { value: 'flux-cablyai', label: 'CablyAI', desc: 'Balanced quality', free: true },
   { value: 'turbo', label: 'Turbo', desc: 'Ultra fast', free: false },
+  { value: 'flux-caricature', label: 'Caricature', desc: 'Cartoon style', free: true },
 ]
 
 const ASPECT_RATIOS = [
@@ -38,25 +135,16 @@ const ASPECT_RATIOS = [
   { label: '2:3', w: 832, h: 1216 },
 ]
 
-// ─── Text Models ──────────────────────────────────────────────
-
 const TEXT_MODELS = [
-  { value: 'openai', label: 'OpenAI (GPT)', desc: 'GPT-4o', models: ['gpt-4o', 'gpt-4o-mini'] },
-  { value: 'anthropic', label: 'Anthropic (Claude)', desc: 'Claude', models: ['claude-sonnet-4-20250514'] },
-  { value: 'google', label: 'Google (Gemini)', desc: 'Gemini', models: ['gemini-2.5-pro'] },
-  { value: 'meta', label: 'Meta (Llama)', desc: 'Llama', models: ['llama-3.3-70b'] },
+  { value: 'openai', label: 'GPT-4o', desc: 'OpenAI · Versatile' },
+  { value: 'anthropic', label: 'Claude', desc: 'Anthropic · Reasoning' },
+  { value: 'google', label: 'Gemini', desc: 'Google · Multimodal' },
+  { value: 'meta', label: 'Llama', desc: 'Meta · Open source' },
 ]
-
-const TEXT_SERVICES = [
-  { value: 'pollinations', label: 'Pollinations Text', desc: 'Free text generation' },
-  { value: 'openai', label: 'OpenAI Compatible', desc: 'Via gen.pollinations.ai' },
-]
-
-// ─── Video Models ─────────────────────────────────────────────
 
 const VIDEO_MODELS = [
-  { value: 'ltxv', label: 'LTX-Video', desc: '121 frames (~5s)', free: true },
-  { value: 'flux', label: 'Flux Video', desc: 'Fast video gen', free: false },
+  { value: 'ltxv', label: 'LTX-Video', desc: '5s · 24fps', free: true },
+  { value: 'flux', label: 'Flux Video', desc: 'Fast gen', free: false },
   { value: 'wan', label: 'Wan 2.1', desc: 'High quality', free: false },
 ]
 
@@ -66,31 +154,114 @@ const VIDEO_DURATIONS = [
   { label: '10s', frames: 241 },
 ]
 
-// ─── Components ───────────────────────────────────────────────
+// ─── Shared Components ─────────────────────────────────────────
+
+function GlassCard({ children, className = '', hover = false }) {
+  return (
+    <div className={`backdrop-blur-xl bg-white/[0.03] border border-white/[0.08] rounded-2xl ${hover ? 'hover:bg-white/[0.06] hover:border-white/[0.12] transition-all duration-300' : ''} ${className}`}>
+      {children}
+    </div>
+  )
+}
+
+function GlassInput({ value, onChange, placeholder, rows = 1, className = '', onKeyDown }) {
+  const Tag = rows > 1 ? 'textarea' : 'input'
+  return (
+    <Tag
+      value={value}
+      onChange={onChange}
+      onKeyDown={onKeyDown}
+      placeholder={placeholder}
+      rows={rows > 1 ? rows : undefined}
+      className={`w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-3.5 text-white/90 placeholder-white/25 focus:outline-none focus:ring-2 focus:ring-violet-500/40 focus:border-violet-500/30 transition-all duration-200 text-sm ${rows > 1 ? 'resize-none' : ''} ${className}`}
+    />
+  )
+}
+
+function ModelChip({ label, desc, active, onClick, free }) {
+  return (
+    <button
+      onClick={onClick}
+      title={desc}
+      className={`relative px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+        active
+          ? 'bg-violet-500/20 border border-violet-400/30 text-violet-200 shadow-lg shadow-violet-500/10'
+          : 'bg-white/[0.03] border border-white/[0.06] text-white/50 hover:text-white/70 hover:bg-white/[0.06]'
+      }`}
+    >
+      <span className="relative z-10">{label}</span>
+      {free && (
+        <span className="ml-1.5 text-[10px] font-bold text-emerald-400 bg-emerald-400/10 px-1.5 py-0.5 rounded-full">FREE</span>
+      )}
+    </button>
+  )
+}
+
+function PrimaryButton({ children, onClick, disabled, loading, icon: Icon, className = '' }) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={`group relative w-full py-3.5 rounded-xl font-semibold text-sm transition-all duration-300 overflow-hidden ${
+        disabled
+          ? 'bg-white/[0.05] text-white/20 cursor-not-allowed'
+          : 'bg-gradient-to-r from-violet-600 via-fuchsia-600 to-violet-600 bg-[length:200%_100%] hover:bg-right text-white shadow-xl shadow-violet-500/20 hover:shadow-violet-500/30 active:scale-[0.98]'
+      } ${className}`}
+    >
+      <span className="relative z-10 flex items-center justify-center gap-2">
+        {loading ? <Icons.Loader className="w-4 h-4" /> : Icon && <Icon className="w-4 h-4" />}
+        {loading ? 'Generating...' : children}
+      </span>
+    </button>
+  )
+}
+
+function Toast({ message, type = 'success', onClose }) {
+  useEffect(() => {
+    const t = setTimeout(onClose, 3000)
+    return () => clearTimeout(t)
+  }, [onClose])
+
+  return (
+    <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-4 py-3 rounded-xl backdrop-blur-xl border text-sm font-medium animate-[slideUp_0.3s_ease-out] ${
+      type === 'success' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' :
+      type === 'error' ? 'bg-red-500/10 border-red-500/20 text-red-400' :
+      'bg-white/10 border-white/10 text-white'
+    }`}>
+      {message}
+    </div>
+  )
+}
+
+// ─── Header ────────────────────────────────────────────────────
 
 function Header() {
   return (
-    <header className="border-b border-white/10 bg-black/50 backdrop-blur-sm sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+    <header className="sticky top-0 z-40 backdrop-blur-xl bg-black/40 border-b border-white/[0.06]">
+      <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <span className="text-3xl">🌱</span>
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-violet-500/20">
+            <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 3l1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5L12 3z"/>
+            </svg>
+          </div>
           <div>
-            <h1 className="text-xl font-bold text-white">Pollinations Studio</h1>
-            <p className="text-xs text-white/50">AI 创意工作室 · Powered by Free APIs</p>
+            <h1 className="text-lg font-bold text-white tracking-tight">Pollinations Studio</h1>
+            <p className="text-[11px] text-white/30 -mt-0.5">AI Creative Workspace</p>
           </div>
         </div>
-        <a
-          href="https://pollinations.ai"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-xs text-white/40 hover:text-white/70 transition-colors"
-        >
-          pollinations.ai
-        </a>
+        <div className="flex items-center gap-4">
+          <a href="https://github.com/EasongChung/pollinations-studio" target="_blank" rel="noopener noreferrer" className="text-white/30 hover:text-white/60 transition-colors">
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+          </a>
+          <a href="https://pollinations.ai" target="_blank" rel="noopener noreferrer" className="text-[11px] text-white/25 hover:text-white/50 transition-colors font-mono">pollinations.ai</a>
+        </div>
       </div>
     </header>
   )
 }
+
+// ─── Image Tab ─────────────────────────────────────────────────
 
 function ImageTab() {
   const [prompt, setPrompt] = useState('')
@@ -100,24 +271,23 @@ function ImageTab() {
   const [seed, setSeed] = useState('')
   const [enhance, setEnhance] = useState(false)
   const [nologo, setNologo] = useState(false)
-  const [safe, setSafe] = useState(true)
-  const [privateGen, setPrivateGen] = useState(false)
   const [guidanceScale, setGuidanceScale] = useState(3.5)
+  const [showAdvanced, setShowAdvanced] = useState(false)
   const [generatedUrl, setGeneratedUrl] = useState('')
-  const [loading, setLoading] = useState(false)
   const [imageUrl, setImageUrl] = useState('')
   const [imageError, setImageError] = useState('')
-  const imgRef = useRef(null)
+  const [generating, setGenerating] = useState(false)
+  const [toast, setToast] = useState(null)
 
   const currentRatio = ASPECT_RATIOS.find(r => r.label === aspectRatio) || ASPECT_RATIOS[0]
 
   const handleGenerate = useCallback(() => {
     if (!prompt.trim()) {
-      setImageError('请输入图像描述')
+      setImageError('Please enter an image description')
       return
     }
     setImageError('')
-    setLoading(true)
+    setGenerating(true)
     setImageUrl('')
 
     const params = new URLSearchParams()
@@ -128,25 +298,29 @@ function ImageTab() {
     if (negativePrompt) params.set('negative_prompt', negativePrompt)
     if (enhance) params.set('enhance', 'true')
     if (nologo) params.set('nologo', 'true')
-    if (safe) params.set('safe', 'true')
-    if (privateGen) params.set('private', 'true')
+    params.set('safe', 'true')
     if (guidanceScale) params.set('guidance_scale', String(guidanceScale))
 
     const url = `https://image.pollinations.ai/p/${encodePrompt(prompt)}?${params.toString()}`
     setGeneratedUrl(url)
-    setImageUrl(url)
-    setLoading(false)
-  }, [prompt, model, currentRatio, seed, negativePrompt, enhance, nologo, safe, privateGen, guidanceScale])
+
+    const img = new Image()
+    img.onload = () => {
+      setImageUrl(url)
+      setGenerating(false)
+    }
+    img.onerror = () => {
+      setImageError('Image failed to load. Try a different prompt or model.')
+      setGenerating(false)
+    }
+    img.src = url
+  }, [prompt, model, currentRatio, seed, negativePrompt, enhance, nologo, guidanceScale])
 
   const handleCopyUrl = () => {
-    if (generatedUrl) {
-      navigator.clipboard.writeText(generatedUrl).then(() => {
-        alert('URL 已复制到剪贴板！')
-      })
-    }
+    navigator.clipboard.writeText(generatedUrl).then(() => setToast({ message: 'URL copied to clipboard', type: 'success' })).catch(() => {})
   }
 
-  const handleSave = () => {
+  const handleDownload = () => {
     if (imageUrl) {
       const a = document.createElement('a')
       a.href = imageUrl
@@ -156,235 +330,211 @@ function ImageTab() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Prompt */}
-      <div className="bg-white/5 rounded-xl p-5 border border-white/10">
-        <label className="block text-sm font-medium text-white/80 mb-2">
-          ✨ 图像描述
-        </label>
-        <textarea
+    <div className="space-y-5">
+      {/* Prompt Card */}
+      <GlassCard className="p-5">
+        <div className="flex items-center gap-2 mb-3">
+          <Icons.Sparkles className="w-4 h-4 text-violet-400" />
+          <span className="text-xs font-semibold text-white/60 uppercase tracking-wider">Prompt</span>
+        </div>
+        <GlassInput
           value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          placeholder="Describe the image you want to generate..."
-          className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 resize-none"
+          onChange={e => setPrompt(e.target.value)}
+          placeholder="A cinematic wide shot of a futuristic city at sunset, golden hour lighting, volumetric fog, 8K..."
           rows={3}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-              e.preventDefault()
-              handleGenerate()
-            }
-          }}
+          onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); handleGenerate() } }}
         />
-        <p className="text-xs text-white/30 mt-1">Ctrl + Enter 快速生成</p>
-      </div>
+        <div className="flex items-center justify-between mt-2">
+          <p className="text-[11px] text-white/20">Ctrl + Enter to generate</p>
+          <p className="text-[11px] text-white/20">{prompt.length} chars</p>
+        </div>
+      </GlassCard>
 
       {/* Negative Prompt */}
-      <div className="bg-white/5 rounded-xl p-5 border border-white/10">
-        <label className="block text-sm font-medium text-white/80 mb-2">
-          🚫 反向提示（不包含的元素）
-        </label>
-        <textarea
+      <GlassCard className="p-5">
+        <div className="flex items-center gap-2 mb-3">
+          <Icons.AlertCircle className="w-4 h-4 text-amber-400" />
+          <span className="text-xs font-semibold text-white/60 uppercase tracking-wider">Negative Prompt</span>
+        </div>
+        <GlassInput
           value={negativePrompt}
-          onChange={(e) => setNegativePrompt(e.target.value)}
-          placeholder="What to avoid in the image..."
-          className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 resize-none"
+          onChange={e => setNegativePrompt(e.target.value)}
+          placeholder="blurry, low quality, watermark, text, distorted..."
           rows={2}
         />
-      </div>
+      </GlassCard>
 
-      {/* Model */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {IMAGE_MODELS.map((m) => (
-          <button
-            key={m.value}
-            onClick={() => setModel(m.value)}
-            className={`p-3 rounded-lg border text-left transition-all ${
-              model === m.value
-                ? 'bg-emerald-500/20 border-emerald-500 text-white'
-                : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
-            }`}
-          >
-            <div className="text-sm font-medium">{m.label}</div>
-            <div className="text-xs text-white/40 mt-1">{m.desc} {m.free && '🆓'}</div>
-          </button>
-        ))}
-      </div>
+      {/* Model Picker */}
+      <GlassCard className="p-5">
+        <div className="flex items-center gap-2 mb-3">
+          <Icons.Image className="w-4 h-4 text-violet-400" />
+          <span className="text-xs font-semibold text-white/60 uppercase tracking-wider">Model</span>
+        </div>
+        <div className="grid grid-cols-4 md:grid-cols-4 gap-2">
+          {IMAGE_MODELS.map(m => (
+            <ModelChip key={m.value} label={m.label} desc={m.desc} active={model === m.value} free={m.free} onClick={() => setModel(m.value)} />
+          ))}
+        </div>
+      </GlassCard>
 
       {/* Aspect Ratio */}
-      <div className="bg-white/5 rounded-xl p-5 border border-white/10">
-        <label className="block text-sm font-medium text-white/80 mb-3">
-          📐 画面比例
-        </label>
+      <GlassCard className="p-5">
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-xs font-semibold text-white/60 uppercase tracking-wider">Aspect Ratio</span>
+        </div>
         <div className="flex gap-2 flex-wrap">
-          {ASPECT_RATIOS.map((r) => (
+          {ASPECT_RATIOS.map(r => (
             <button
               key={r.label}
               onClick={() => setAspectRatio(r.label)}
-              className={`px-4 py-2 rounded-lg border text-sm transition-all ${
+              className={`px-4 py-2 rounded-xl border text-sm font-medium transition-all duration-200 ${
                 aspectRatio === r.label
-                  ? 'bg-emerald-500/20 border-emerald-500 text-white'
-                  : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
+                  ? 'bg-violet-500/20 border-violet-400/30 text-violet-200'
+                  : 'bg-white/[0.03] border-white/[0.06] text-white/40 hover:text-white/70 hover:bg-white/[0.06]'
               }`}
             >
               {r.label}
+              <span className="ml-1.5 text-[10px] text-white/30">{r.w}×{r.h}</span>
             </button>
           ))}
         </div>
-      </div>
+      </GlassCard>
+
+      {/* Advanced Toggle */}
+      <button
+        onClick={() => setShowAdvanced(!showAdvanced)}
+        className="flex items-center gap-2 text-xs text-white/40 hover:text-white/70 transition-colors"
+      >
+        <Icons.Settings className="w-3.5 h-3.5" />
+        Advanced Options
+        <svg className={`w-3 h-3 transition-transform duration-200 ${showAdvanced ? 'rotate-90' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
 
       {/* Advanced Options */}
-      <details className="bg-white/5 rounded-xl border border-white/10">
-        <summary className="px-5 py-3 cursor-pointer text-sm font-medium text-white/80 select-none">
-          ⚙️ 高级选项
-        </summary>
-        <div className="px-5 pb-5 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {showAdvanced && (
+        <GlassCard className="p-5 space-y-4 animate-[fadeIn_0.2s_ease-out]">
+          <div className="grid grid-cols-2 gap-5">
             <div>
-              <label className="block text-sm text-white/60 mb-1">Seed (随机种子)</label>
+              <label className="text-xs text-white/40 mb-1.5 block">Seed</label>
               <input
                 type="text"
                 value={seed}
-                onChange={(e) => setSeed(e.target.value)}
-                placeholder="留空则随机"
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 text-sm"
+                onChange={e => setSeed(e.target.value)}
+                placeholder="Random"
+                className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-3 py-2.5 text-white/80 text-sm placeholder-white/20 focus:outline-none focus:ring-2 focus:ring-violet-500/40"
               />
             </div>
             <div>
-              <label className="block text-sm text-white/60 mb-1">Guidance Scale: {guidanceScale}</label>
+              <label className="text-xs text-white/40 mb-1.5 block">Guidance Scale · {guidanceScale}</label>
               <input
-                type="range"
-                min="1"
-                max="20"
-                step="0.5"
+                type="range" min="1" max="20" step="0.5"
                 value={guidanceScale}
-                onChange={(e) => setGuidanceScale(parseFloat(e.target.value))}
-                className="w-full accent-emerald-500"
+                onChange={e => setGuidanceScale(parseFloat(e.target.value))}
+                className="w-full accent-violet-500"
               />
             </div>
           </div>
-
-          <div className="space-y-3">
-            {[
-              { checked: enhance, set: setEnhance, label: 'Enhance (提示词增强)' },
-              { checked: nologo, set: setNologo, label: 'No Logo (去除水印)' },
-              { checked: safe, set: setSafe, label: 'Safe Filter (安全过滤)' },
-              { checked: privateGen, set: setPrivateGen, label: 'Private (仅自己可见)' },
-            ].map(({ checked, set, label }) => (
-              <label key={label} className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={checked}
-                  onChange={(e) => set(e.target.checked)}
-                  className="w-4 h-4 accent-emerald-500 rounded"
-                />
-                <span className="text-sm text-white/70">{label}</span>
-              </label>
-            ))}
+          <div className="flex gap-4">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" checked={enhance} onChange={e => setEnhance(e.target.checked)} className="w-4 h-4 accent-violet-500 rounded" />
+              <span className="text-xs text-white/60">Enhance prompt</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" checked={nologo} onChange={e => setNologo(e.target.checked)} className="w-4 h-4 accent-violet-500 rounded" />
+              <span className="text-xs text-white/60">Remove watermark</span>
+            </label>
           </div>
-        </div>
-      </details>
+        </GlassCard>
+      )}
 
       {/* Generate Button */}
-      <button
-        onClick={handleGenerate}
-        disabled={loading || !prompt.trim()}
-        className="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 disabled:from-white/10 disabled:to-white/10 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all text-lg flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20"
-      >
-        {loading ? (
-          <>
-            <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-            </svg>
-            生成中...
-          </>
-        ) : (
-          <>🎨 生成图像</>
-        )}
-      </button>
+      <PrimaryButton onClick={handleGenerate} disabled={generating || !prompt.trim()} loading={generating} icon={Icons.Sparkles}>
+        Generate Image
+      </PrimaryButton>
 
       {/* Loading State */}
-      {loading && (
-        <div className="text-center py-8">
-          <p className="text-white/60">正在生成图像，请稍候...</p>
-          <p className="text-xs text-white/30 mt-2">通常 5-30 秒完成</p>
+      {generating && (
+        <div className="flex flex-col items-center gap-3 py-12">
+          <div className="relative">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 border border-white/10 animate-pulse flex items-center justify-center">
+              <Icons.Loader className="w-6 h-6 text-violet-400" />
+            </div>
+          </div>
+          <p className="text-sm text-white/40">Creating your image...</p>
+          <div className="w-48 h-0.5 bg-white/[0.06] rounded-full overflow-hidden">
+            <div className="h-full bg-gradient-to-r from-violet-500 to-fuchsia-500 rounded-full animate-[shimmer_2s_ease-in-out_infinite]" style={{ width: '60%' }} />
+          </div>
         </div>
       )}
 
       {/* Result */}
-      {imageUrl && !loading && (
-        <div className="space-y-4">
-          <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-            <div className="relative group">
-              <img
-                ref={imgRef}
-                src={imageUrl}
-                alt={prompt}
-                className="w-full rounded-lg"
-                onError={() => setImageError('图像加载失败，请重试')}
-              />
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all rounded-lg flex items-center justify-center">
+      {imageUrl && !generating && (
+        <div className="space-y-4 animate-[fadeIn_0.4s_ease-out]">
+          <GlassCard className="p-3 overflow-hidden">
+            <div className="relative group rounded-xl overflow-hidden">
+              <img src={imageUrl} alt={prompt} className="w-full rounded-xl" onError={() => setImageError('Image failed to load')} />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300 rounded-xl flex items-center justify-center">
                 <a
-                  href={imageUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hidden group-hover:flex items-center gap-2 bg-white/90 text-gray-900 px-4 py-2 rounded-lg font-medium"
+                  href={imageUrl} target="_blank" rel="noopener noreferrer"
+                  className="opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center gap-2 bg-white/90 backdrop-blur-sm text-gray-900 px-4 py-2.5 rounded-xl font-medium text-sm"
                 >
-                  🔗 在新窗口查看原图
+                  <Icons.ExternalLink className="w-4 h-4" />
+                  View Full Size
                 </a>
               </div>
             </div>
-          </div>
+          </GlassCard>
 
-          {/* Actions */}
           <div className="grid grid-cols-2 gap-3">
-            <button
-              onClick={handleSave}
-              className="py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors text-sm font-medium"
-            >
-              💾 下载图片
+            <button onClick={handleDownload} className="flex items-center justify-center gap-2 py-3 bg-white/[0.05] hover:bg-white/[0.10] border border-white/[0.08] rounded-xl text-sm font-medium text-white/80 transition-all duration-200">
+              <Icons.Download className="w-4 h-4" />
+              Download
             </button>
-            <button
-              onClick={handleCopyUrl}
-              className="py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors text-sm font-medium"
-            >
-              📋 复制 URL
+            <button onClick={handleCopyUrl} className="flex items-center justify-center gap-2 py-3 bg-white/[0.05] hover:bg-white/[0.10] border border-white/[0.08] rounded-xl text-sm font-medium text-white/80 transition-all duration-200">
+              <Icons.Copy className="w-4 h-4" />
+              Copy URL
             </button>
           </div>
 
-          {/* Generated URL */}
-          <div className="bg-black/30 rounded-lg p-4 border border-white/5">
-            <div className="text-xs text-white/40 mb-2">直接链接</div>
-            <code className="text-xs text-emerald-400 break-all">{generatedUrl}</code>
+          <div className="bg-black/20 rounded-xl p-4 border border-white/[0.04]">
+            <p className="text-[10px] text-white/20 mb-1.5 font-mono uppercase tracking-wider">Direct URL</p>
+            <code className="text-[11px] text-violet-400/80 break-all font-mono leading-relaxed">{generatedUrl}</code>
           </div>
         </div>
       )}
 
       {imageError && (
-        <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 text-red-400 text-sm">
-          {imageError}
-        </div>
+        <GlassCard className="p-4 border-red-500/20 bg-red-500/[0.04]">
+          <div className="flex items-start gap-3">
+            <Icons.AlertCircle className="w-4 h-4 text-red-400 mt-0.5 shrink-0" />
+            <p className="text-sm text-red-400/80">{imageError}</p>
+          </div>
+        </GlassCard>
       )}
+
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   )
 }
 
+// ─── Text Tab ──────────────────────────────────────────────────
+
 function TextTab() {
-  const [service, setService] = useState('pollinations')
   const [prompt, setPrompt] = useState('')
-  const [model, setModel] = useState('flux')
+  const [model, setModel] = useState('openai')
   const [messages, setMessages] = useState([])
   const [loading, setLoading] = useState(false)
   const [maxTokens, setMaxTokens] = useState('2000')
   const [temperature, setTemperature] = useState('0.7')
   const chatEndRef = useRef(null)
+  const inputRef = useRef(null)
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  const handleGenerate = useCallback(() => {
-    if (!prompt.trim()) return
+  const handleSend = useCallback(() => {
+    if (!prompt.trim() || loading) return
 
     const userMsg = { role: 'user', content: prompt.trim() }
     setMessages(prev => [...prev, userMsg])
@@ -394,138 +544,131 @@ function TextTab() {
     const url = `https://text.pollinations.ai/${encodePrompt(prompt)}?model=${model}&max_tokens=${maxTokens}&temperature=${temperature}`
 
     fetch(url, { signal: AbortSignal.timeout(120000) })
-      .then(res => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`)
-        return res.text()
-      })
-      .then(text => {
-        setMessages(prev => [...prev, { role: 'assistant', content: text }])
-        setLoading(false)
-      })
+      .then(res => { if (!res.ok) throw new Error(`HTTP ${res.status}`); return res.text() })
+      .then(text => { setMessages(prev => [...prev, { role: 'assistant', content: text }]); setLoading(false) })
       .catch(err => {
-        if (err.name === 'AbortError') {
-          setMessages(prev => [...prev, {
-            role: 'assistant',
-            content: '⚠️ 请求超时，请重试。如果持续失败，可能是模型响应较慢。'
-          }])
-        } else {
-          setMessages(prev => [...prev, {
-            role: 'assistant',
-            content: `❌ 错误: ${err.message}`
-          }])
-        }
+        setMessages(prev => [...prev, { role: 'assistant', content: err.name === 'AbortError' ? 'Request timed out. Please try again.' : `Error: ${err.message}` }])
         setLoading(false)
       })
-  }, [prompt, model, maxTokens, temperature])
+  }, [prompt, model, maxTokens, temperature, loading])
+
+  const handleKeyDown = useCallback(e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() }
+  }, [handleSend])
 
   return (
     <div className="space-y-4">
       {/* Model Selector */}
-      <div className="grid grid-cols-2 gap-3">
-        {TEXT_MODELS.map((m) => (
-          <button
-            key={m.value}
-            onClick={() => setModel(m.value)}
-            className={`p-3 rounded-lg border text-left transition-all ${
-              model === m.value
-                ? 'bg-emerald-500/20 border-emerald-500 text-white'
-                : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
-            }`}
-          >
-            <div className="text-sm font-medium">{m.label}</div>
-            <div className="text-xs text-white/40 mt-1">{m.desc}</div>
-          </button>
-        ))}
-      </div>
+      <GlassCard className="p-4">
+        <div className="grid grid-cols-4 gap-2">
+          {TEXT_MODELS.map(m => (
+            <button
+              key={m.value}
+              onClick={() => setModel(m.value)}
+              className={`p-3 rounded-xl border text-left transition-all duration-200 ${
+                model === m.value
+                  ? 'bg-violet-500/20 border-violet-400/30'
+                  : 'bg-white/[0.03] border-white/[0.06] hover:bg-white/[0.06]'
+              }`}
+            >
+              <div className="text-sm font-semibold text-white">{m.label}</div>
+              <div className="text-[10px] text-white/30 mt-0.5">{m.desc}</div>
+            </button>
+          ))}
+        </div>
+      </GlassCard>
 
-      {/* Prompt Input */}
-      <div className="flex gap-2">
-        <input
-          type="text"
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          placeholder="输入你的问题或指令..."
-          className="flex-1 bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-              e.preventDefault()
-              handleGenerate()
-            }
-          }}
-        />
-        <button
-          onClick={handleGenerate}
-          disabled={loading || !prompt.trim()}
-          className="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 disabled:bg-white/10 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors whitespace-nowrap"
-        >
-          {loading ? '⏳' : '💬'}
-        </button>
-      </div>
-
-      {/* Chat Messages */}
-      <div className="bg-white/5 rounded-xl border border-white/10 min-h-[300px] max-h-[500px] overflow-y-auto">
-        {messages.length === 0 ? (
-          <div className="flex items-center justify-center h-[300px] text-white/30">
-            <div className="text-center">
-              <p className="text-lg">💬</p>
-              <p className="text-sm mt-2">开始一段对话</p>
-            </div>
-          </div>
-        ) : (
-          <div className="p-4 space-y-4">
-            {messages.map((msg, i) => (
-              <div
-                key={i}
-                className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
-                <div
-                  className={`max-w-[85%] rounded-xl px-4 py-3 text-sm leading-relaxed ${
-                    msg.role === 'user'
-                      ? 'bg-emerald-500/20 text-white'
-                      : 'bg-white/10 text-white/90'
-                  }`}
-                >
-                  <pre className="whitespace-pre-wrap font-sans text-sm">
-                    {msg.content}
-                  </pre>
-                </div>
+      {/* Chat Area */}
+      <GlassCard className="overflow-hidden">
+        <div className="h-[480px] overflow-y-auto">
+          {messages.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full text-white/20 gap-3">
+              <div className="w-16 h-16 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center">
+                <Icons.Bot className="w-8 h-8" />
               </div>
-            ))}
-            <div ref={chatEndRef} />
-          </div>
-        )}
-      </div>
+              <p className="text-sm font-medium">Start a conversation</p>
+              <p className="text-xs text-white/10">Choose a model and send a message</p>
+            </div>
+          ) : (
+            <div className="p-4 space-y-5">
+              {messages.map((msg, i) => (
+                <div key={i} className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
+                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
+                    msg.role === 'user' ? 'bg-violet-500/20' : 'bg-white/[0.06]'
+                  }`}>
+                    {msg.role === 'user'
+                      ? <Icons.User className="w-4 h-4 text-violet-300" />
+                      : <Icons.Bot className="w-4 h-4 text-white/40" />
+                    }
+                  </div>
+                  <div className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+                    msg.role === 'user'
+                      ? 'bg-violet-500/15 border border-violet-400/20 text-white/90 rounded-tr-md'
+                      : 'bg-white/[0.04] border border-white/[0.06] text-white/80 rounded-tl-md'
+                  }`}>
+                    <pre className="whitespace-pre-wrap font-sans text-sm">{msg.content}</pre>
+                  </div>
+                </div>
+              ))}
+              {loading && (
+                <div className="flex gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-white/[0.06] flex items-center justify-center shrink-0">
+                    <Icons.Bot className="w-4 h-4 text-white/40" />
+                  </div>
+                  <div className="bg-white/[0.04] border border-white/[0.06] rounded-2xl rounded-tl-md px-4 py-3">
+                    <div className="flex gap-1.5">
+                      <div className="w-2 h-2 rounded-full bg-white/20 animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <div className="w-2 h-2 rounded-full bg-white/20 animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <div className="w-2 h-2 rounded-full bg-white/20 animate-bounce" style={{ animationDelay: '300ms' }} />
+                    </div>
+                  </div>
+                </div>
+              )}
+              <div ref={chatEndRef} />
+            </div>
+          )}
+        </div>
 
-      {/* Settings */}
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="text-xs text-white/40 mb-1 block">Max Tokens: {maxTokens}</label>
-          <input
-            type="range"
-            min="256"
-            max="8192"
-            step="256"
-            value={maxTokens}
-            onChange={(e) => setMaxTokens(e.target.value)}
-            className="w-full accent-emerald-500"
-          />
+        {/* Input Area */}
+        <div className="border-t border-white/[0.06] p-4">
+          <div className="flex gap-2">
+            <input
+              ref={inputRef}
+              type="text"
+              value={prompt}
+              onChange={e => setPrompt(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Type your message..."
+              className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-3 text-white/90 placeholder-white/25 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/40 focus:border-violet-500/30 transition-all duration-200"
+            />
+            <button
+              onClick={handleSend}
+              disabled={loading || !prompt.trim()}
+              className="w-11 h-11 rounded-xl bg-violet-500 hover:bg-violet-600 disabled:bg-white/[0.06] disabled:cursor-not-allowed flex items-center justify-center transition-all duration-200"
+            >
+              <Icons.Send className="w-4 h-4 text-white" />
+            </button>
+          </div>
+          <div className="flex items-center justify-between mt-3">
+            <div className="flex gap-4">
+              <div className="flex items-center gap-2">
+                <label className="text-[10px] text-white/20">Tokens: {maxTokens}</label>
+                <input type="range" min="256" max="8192" step="256" value={maxTokens} onChange={e => setMaxTokens(e.target.value)} className="w-20 accent-violet-500" />
+              </div>
+              <div className="flex items-center gap-2">
+                <label className="text-[10px] text-white/20">Temp: {temperature}</label>
+                <input type="range" min="0.1" max="2" step="0.1" value={temperature} onChange={e => setTemperature(e.target.value)} className="w-20 accent-violet-500" />
+              </div>
+            </div>
+            <p className="text-[10px] text-white/15">Press Enter to send</p>
+          </div>
         </div>
-        <div>
-          <label className="text-xs text-white/40 mb-1 block">Temperature: {temperature}</label>
-          <input
-            type="range"
-            min="0.1"
-            max="2"
-            step="0.1"
-            value={temperature}
-            onChange={(e) => setTemperature(e.target.value)}
-            className="w-full accent-emerald-500"
-          />
-        </div>
-      </div>
+      </GlassCard>
     </div>
   )
 }
+
+// ─── Video Tab ─────────────────────────────────────────────────
 
 function VideoTab() {
   const [prompt, setPrompt] = useState('')
@@ -534,318 +677,195 @@ function VideoTab() {
   const [duration, setDuration] = useState('5s')
   const [width, setWidth] = useState('512')
   const [height, setHeight] = useState('512')
-  const [generatedUrl, setGeneratedUrl] = useState('')
   const [loading, setLoading] = useState(false)
-  const [videoBlob, setVideoBlob] = useState(null)
   const [videoUrl, setVideoUrl] = useState('')
   const [progress, setProgress] = useState(0)
+  const [error, setError] = useState('')
 
   const handleGenerate = useCallback(() => {
-    if (!prompt.trim()) return
-    if (!imageUrl.trim()) {
-      alert('图生视频需要提供参考图片 URL')
-      return
-    }
-
+    if (!prompt.trim()) { setError('Please enter a motion description'); return }
+    if (!imageUrl.trim()) { setError('Please provide a reference image URL'); return }
+    setError('')
     setLoading(true)
     setProgress(5)
-    setVideoBlob(null)
     setVideoUrl('')
 
-    const params = new URLSearchParams({
-      model: model,
-      prompt: encodePrompt(prompt),
-      image_url: imageUrl,
-      duration: duration,
-      width: width,
-      height: height,
-      frames: duration === '2s' ? '49' : duration === '5s' ? '121' : '241',
-    })
+    const frames = duration === '2s' ? '49' : duration === '5s' ? '121' : '241'
+    const url = `https://video.pollinations.ai/${encodePrompt(prompt)}?model=${model}&image_url=${encodeURIComponent(imageUrl)}&duration=${duration}&width=${width}&height=${height}&frames=${frames}`
 
-    const url = `https://video.pollinations.ai/${params.toString()}`
-    setGeneratedUrl(url)
     setProgress(20)
 
-    // Fetch the video
     fetch(url, { signal: AbortSignal.timeout(300000) })
-      .then(res => {
-        setProgress(60)
-        if (!res.ok) throw new Error(`HTTP ${res.status}`)
-        return res.blob()
-      })
-      .then(blob => {
-        setProgress(80)
-        setVideoBlob(blob)
-        setVideoUrl(URL.createObjectURL(blob))
-        setProgress(100)
-        setLoading(false)
-      })
+      .then(res => { setProgress(60); if (!res.ok) throw new Error(`HTTP ${res.status}`); return res.blob() })
+      .then(blob => { setProgress(80); setVideoUrl(URL.createObjectURL(blob)); setProgress(100); setLoading(false) })
       .catch(err => {
-        setProgress(0)
-        setLoading(false)
-        alert(`生成失败: ${err.message}`)
+        setProgress(0); setLoading(false)
+        setError(err.name === 'AbortError' ? 'Video generation timed out' : `Generation failed: ${err.message}`)
       })
   }, [prompt, imageUrl, model, duration, width, height])
 
-  const handleDownload = () => {
-    if (videoUrl) {
-      const a = document.createElement('a')
-      a.href = videoUrl
-      a.download = `pollinations-video-${Date.now()}.mp4`
-      a.click()
-    }
-  }
-
   return (
-    <div className="space-y-4">
-      {/* Reference Image URL */}
-      <div className="bg-white/5 rounded-xl p-5 border border-white/10">
-        <label className="block text-sm font-medium text-white/80 mb-2">
-          🖼️ 参考图片 URL（必填）
-        </label>
-        <input
-          type="url"
+    <div className="space-y-5">
+      {/* Reference Image */}
+      <GlassCard className="p-5">
+        <div className="flex items-center gap-2 mb-3">
+          <Icons.Image className="w-4 h-4 text-violet-400" />
+          <span className="text-xs font-semibold text-white/60 uppercase tracking-wider">Reference Image URL</span>
+        </div>
+        <GlassInput
           value={imageUrl}
-          onChange={(e) => setImageUrl(e.target.value)}
-          placeholder="https://example.com/reference-image.jpg"
-          className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+          onChange={e => setImageUrl(e.target.value)}
+          placeholder="https://example.com/your-reference-image.jpg"
         />
-        <p className="text-xs text-white/30 mt-1">输入图片的网络地址，支持 PNG/JPG/WebP</p>
-      </div>
+        <p className="text-[11px] text-white/20 mt-2">Supports PNG, JPG, WebP — provide a publicly accessible URL</p>
+      </GlassCard>
 
-      {/* Motion Description */}
-      <div className="bg-white/5 rounded-xl p-5 border border-white/10">
-        <label className="block text-sm font-medium text-white/80 mb-2">
-          🎬 运动描述
-        </label>
-        <textarea
+      {/* Motion Prompt */}
+      <GlassCard className="p-5">
+        <div className="flex items-center gap-2 mb-3">
+          <Icons.Video className="w-4 h-4 text-violet-400" />
+          <span className="text-xs font-semibold text-white/60 uppercase tracking-wider">Motion Description</span>
+        </div>
+        <GlassInput
           value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          placeholder="描述图片中应该发生的运动或变化..."
-          className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 resize-none"
+          onChange={e => setPrompt(e.target.value)}
+          placeholder="The camera slowly pans right as gentle waves ripple across the water surface..."
           rows={3}
         />
-      </div>
+      </GlassCard>
 
-      {/* Model & Duration */}
-      <div className="grid grid-cols-3 gap-3">
-        {VIDEO_MODELS.map((m) => (
-          <button
-            key={m.value}
-            onClick={() => setModel(m.value)}
-            className={`p-3 rounded-lg border text-left transition-all ${
-              model === m.value
-                ? 'bg-emerald-500/20 border-emerald-500 text-white'
-                : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
-            }`}
-          >
-            <div className="text-sm font-medium">{m.label}</div>
-            <div className="text-xs text-white/40 mt-1">{m.desc} {m.free && '🆓'}</div>
-          </button>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="block text-sm font-medium text-white/80 mb-1">时长</label>
-          <select
-            value={duration}
-            onChange={(e) => setDuration(e.target.value)}
-            className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
-          >
-            {VIDEO_DURATIONS.map(d => (
-              <option key={d.label} value={d.label}>{d.label}</option>
-            ))}
-          </select>
+      {/* Model & Settings */}
+      <GlassCard className="p-5">
+        <div className="grid grid-cols-3 gap-2 mb-4">
+          {VIDEO_MODELS.map(m => (
+            <ModelChip key={m.value} label={m.label} desc={m.desc} active={model === m.value} free={m.free} onClick={() => setModel(m.value)} />
+          ))}
         </div>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-3 gap-3">
           <div>
-            <label className="block text-sm font-medium text-white/80 mb-1">宽度</label>
-            <input
-              type="number"
-              value={width}
-              onChange={(e) => setWidth(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
-            />
+            <label className="text-[10px] text-white/30 mb-1 block">Duration</label>
+            <select value={duration} onChange={e => setDuration(e.target.value)} className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-3 py-2.5 text-white/80 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/40">
+              {VIDEO_DURATIONS.map(d => <option key={d.label} value={d.label}>{d.label}</option>)}
+            </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-white/80 mb-1">高度</label>
-            <input
-              type="number"
-              value={height}
-              onChange={(e) => setHeight(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
-            />
+            <label className="text-[10px] text-white/30 mb-1 block">Width</label>
+            <input type="number" value={width} onChange={e => setWidth(e.target.value)} className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-3 py-2.5 text-white/80 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/40" />
+          </div>
+          <div>
+            <label className="text-[10px] text-white/30 mb-1 block">Height</label>
+            <input type="number" value={height} onChange={e => setHeight(e.target.value)} className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-3 py-2.5 text-white/80 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/40" />
           </div>
         </div>
-      </div>
+      </GlassCard>
 
-      {/* Generate Button */}
-      <button
-        onClick={handleGenerate}
-        disabled={loading || !prompt.trim() || !imageUrl.trim()}
-        className="w-full py-4 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 disabled:from-white/10 disabled:to-white/10 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all text-lg flex items-center justify-center gap-2"
-      >
-        {loading ? (
-          <>
-            <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-            </svg>
-            生成视频中... ({progress}%)
-          </>
-        ) : (
-          <>🎬 生成视频</>
-        )}
-      </button>
+      <PrimaryButton onClick={handleGenerate} disabled={loading || !prompt.trim() || !imageUrl.trim()} loading={loading} icon={Icons.Video}>
+        Generate Video
+      </PrimaryButton>
 
-      {/* Progress Bar */}
       {loading && (
-        <div className="bg-white/5 rounded-lg overflow-hidden">
-          <div
-            className="h-2 bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-500"
-            style={{ width: `${progress}%` }}
-          />
+        <div className="space-y-4">
+          <div className="relative h-2 bg-white/[0.06] rounded-full overflow-hidden">
+            <div className="h-full bg-gradient-to-r from-violet-500 to-fuchsia-500 rounded-full transition-all duration-500 ease-out" style={{ width: `${progress}%` }} />
+          </div>
+          <p className="text-center text-xs text-white/30">{progress}% — this may take a few minutes</p>
         </div>
       )}
 
-      {/* Video Result */}
       {videoUrl && (
-        <div className="space-y-4">
-          <video
-            src={videoUrl}
-            controls
-            className="w-full rounded-xl border border-white/10 bg-black"
-          />
+        <div className="space-y-4 animate-[fadeIn_0.4s_ease-out]">
+          <GlassCard className="p-3 overflow-hidden">
+            <video src={videoUrl} controls className="w-full rounded-xl" />
+          </GlassCard>
           <button
-            onClick={handleDownload}
-            className="w-full py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors font-medium"
+            onClick={() => { const a = document.createElement('a'); a.href = videoUrl; a.download = `pollinations-video-${Date.now()}.mp4`; a.click() }}
+            className="flex items-center justify-center gap-2 w-full py-3 bg-white/[0.05] hover:bg-white/[0.10] border border-white/[0.08] rounded-xl text-sm font-medium text-white/80 transition-all duration-200"
           >
-            💾 下载视频
+            <Icons.Download className="w-4 h-4" />
+            Download Video
           </button>
         </div>
+      )}
+
+      {error && (
+        <GlassCard className="p-4 border-red-500/20 bg-red-500/[0.04]">
+          <div className="flex items-start gap-3">
+            <Icons.AlertCircle className="w-4 h-4 text-red-400 mt-0.5 shrink-0" />
+            <p className="text-sm text-red-400/80">{error}</p>
+          </div>
+        </GlassCard>
       )}
     </div>
   )
 }
 
-// ─── Main App ─────────────────────────────────────────────────
+// ─── Main App ──────────────────────────────────────────────────
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('image')
 
   const tabs = [
-    { key: 'image', label: '文生图', icon: '🎨' },
-    { key: 'text', label: 'AI 对话', icon: '💬' },
-    { key: 'video', label: '图生视频', icon: '🎬' },
+    { key: 'image', label: 'Image Generation', icon: Icons.Image },
+    { key: 'text', label: 'AI Chat', icon: Icons.MessageCircle },
+    { key: 'video', label: 'Video Generation', icon: Icons.Video },
   ]
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
-      <div className="bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-900/20 via-gray-950 to-gray-950">
-        <Header />
-        <main className="max-w-7xl mx-auto px-4 py-6">
-          {/* Tab Navigation */}
-          <div className="flex gap-1 mb-6 bg-white/5 rounded-xl p-1 border border-white/10">
-            {tabs.map((tab) => (
+    <div className="min-h-screen bg-[#0a0a0f] text-white">
+      {/* Background Effects */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-violet-500/[0.03] rounded-full blur-[120px]" />
+        <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-fuchsia-500/[0.03] rounded-full blur-[120px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-gradient-to-b from-violet-500/[0.02] to-transparent rounded-full blur-[100px]" />
+      </div>
+
+      <Header />
+
+      <main className="relative z-10 max-w-6xl mx-auto px-6 py-8">
+        {/* Hero */}
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold text-white tracking-tight">
+            Create with <span className="bg-gradient-to-r from-violet-400 to-fuchsia-400 bg-clip-text text-transparent">AI</span>
+          </h2>
+          <p className="text-sm text-white/30 mt-2 max-w-md mx-auto">
+            Generate images, chat with AI, and create videos — all powered by Pollinations, completely free.
+          </p>
+        </div>
+
+        {/* Tab Navigation */}
+        <div className="flex justify-center mb-8">
+          <div className="inline-flex bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl p-1">
+            {tabs.map(tab => (
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`flex-1 py-3 px-4 rounded-lg text-sm font-medium transition-all ${
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
                   activeTab === tab.key
-                    ? 'bg-emerald-500/20 text-white shadow-lg'
-                    : 'text-white/50 hover:text-white/70 hover:bg-white/5'
+                    ? 'bg-violet-500/20 text-white shadow-lg shadow-violet-500/10'
+                    : 'text-white/40 hover:text-white/70'
                 }`}
               >
-                <span className="mr-2">{tab.icon}</span>
+                <tab.icon className="w-4 h-4" />
                 {tab.label}
               </button>
             ))}
           </div>
+        </div>
 
-          {/* Tab Content */}
-          <div className="md:grid md:grid-cols-5 md:gap-6">
-            <div className="md:col-span-3">
-              {activeTab === 'image' && <ImageTab />}
-              {activeTab === 'text' && <TextTab />}
-              {activeTab === 'video' && <VideoTab />}
-            </div>
+        {/* Content */}
+        <div className="max-w-2xl mx-auto">
+          {activeTab === 'image' && <ImageTab />}
+          {activeTab === 'text' && <TextTab />}
+          {activeTab === 'video' && <VideoTab />}
+        </div>
 
-            {/* Sidebar */}
-            <div className="md:col-span-2 mt-6 md:mt-0">
-              <div className="space-y-4">
-                {/* Stats Card */}
-                <div className="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 rounded-xl p-5">
-                  <h3 className="text-sm font-medium text-emerald-400 mb-3">💡 使用提示</h3>
-                  <ul className="space-y-2 text-xs text-white/60">
-                    <li className="flex items-start gap-2">
-                      <span className="text-emerald-500 mt-0.5">•</span>
-                      <span>所有生成都免费，无需注册或 API Key</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-emerald-500 mt-0.5">•</span>
-                      <span>图像生成通常 5-30 秒完成</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-emerald-500 mt-0.5">•</span>
-                      <span>详细描述画面可获得更好的效果</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-emerald-500 mt-0.5">•</span>
-                      <span>生成的图片可直接下载或复制链接分享</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-emerald-500 mt-0.5">•</span>
-                      <span>图生视频需要先提供参考图片 URL</span>
-                    </li>
-                  </ul>
-                </div>
-
-                {/* API Info Card */}
-                <div className="bg-white/5 border border-white/10 rounded-xl p-5">
-                  <h3 className="text-sm font-medium text-white/80 mb-3">🔗 直接链接</h3>
-                  <div className="space-y-2 text-xs">
-                    <a
-                      href="https://image.pollinations.ai"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block text-white/50 hover:text-emerald-400 transition-colors"
-                    >
-                      图像 API →
-                    </a>
-                    <a
-                      href="https://text.pollinations.ai"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block text-white/50 hover:text-emerald-400 transition-colors"
-                    >
-                      文本 API →
-                    </a>
-                    <a
-                      href="https://gen.pollinations.ai"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block text-white/50 hover:text-emerald-400 transition-colors"
-                    >
-                      统一 API 网关 →
-                    </a>
-                  </div>
-                </div>
-
-                {/* License Card */}
-                <div className="bg-white/5 border border-white/10 rounded-xl p-5">
-                  <h3 className="text-sm font-medium text-white/80 mb-2">📜 开源协议</h3>
-                  <p className="text-xs text-white/40 leading-relaxed">
-                    本应用基于 Pollinations.ai 构建。
-                    Pollinations 采用 MIT 许可证开源。
-                    所有生成的内容版权归用户所有。
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </main>
-      </div>
+        {/* Footer */}
+        <footer className="mt-16 pt-8 border-t border-white/[0.04] text-center">
+          <p className="text-xs text-white/20">
+            Built with Pollinations AI · Open source on GitHub · Free to use
+          </p>
+        </footer>
+      </main>
     </div>
   )
 }
